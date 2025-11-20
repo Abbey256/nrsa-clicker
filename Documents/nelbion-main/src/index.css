@@ -1,0 +1,186 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 215 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    /* Deep professional blue */
+    --primary: 215 85% 25%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Gold accent */
+    --gold: 45 100% 50%;
+    --gold-foreground: 215 25% 15%;
+
+    --secondary: 215 20% 95%;
+    --secondary-foreground: 215 25% 15%;
+
+    --muted: 215 15% 96%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 45 95% 58%;
+    --accent-foreground: 215 25% 15%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 20% 88%;
+    --input: 215 20% 88%;
+    --ring: 215 85% 25%;
+
+    --radius: 0.75rem;
+
+    /* African-inspired earth tones */
+    --earth: 25 45% 45%;
+    --earth-light: 25 45% 95%;
+    
+    /* Success/growth green */
+    --success: 145 65% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --sidebar-background: 215 25% 98%;
+    --sidebar-foreground: 215 25% 20%;
+    --sidebar-primary: 215 85% 25%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 20% 93%;
+    --sidebar-accent-foreground: 215 25% 20%;
+    --sidebar-border: 215 20% 88%;
+    --sidebar-ring: 215 85% 25%;
+    
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(215 85% 25%) 0%, hsl(215 75% 35%) 50%, hsl(45 95% 58%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(215 20% 98%) 100%);
+    
+    /* Shadows */
+    --shadow-soft: 0 2px 8px hsl(215 25% 15% / 0.08);
+    --shadow-medium: 0 4px 16px hsl(215 25% 15% / 0.12);
+    --shadow-large: 0 8px 32px hsl(215 25% 15% / 0.16);
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 215 30% 8%;
+    --foreground: 215 15% 95%;
+
+    --card: 215 28% 12%;
+    --card-foreground: 215 15% 95%;
+
+    --popover: 215 28% 12%;
+    --popover-foreground: 215 15% 95%;
+
+    --primary: 45 95% 58%;
+    --primary-foreground: 215 30% 8%;
+    
+    --gold: 45 100% 55%;
+    --gold-foreground: 215 30% 8%;
+
+    --secondary: 215 25% 18%;
+    --secondary-foreground: 215 15% 95%;
+
+    --muted: 215 25% 16%;
+    --muted-foreground: 215 15% 65%;
+
+    --accent: 45 95% 58%;
+    --accent-foreground: 215 30% 8%;
+
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 25% 20%;
+    --input: 215 25% 20%;
+    --ring: 45 95% 58%;
+    
+    --earth: 25 35% 55%;
+    --earth-light: 25 25% 18%;
+    
+    --success: 145 55% 55%;
+    --success-foreground: 215 30% 8%;
+
+    --sidebar-background: 215 30% 10%;
+    --sidebar-foreground: 215 15% 90%;
+    --sidebar-primary: 45 95% 58%;
+    --sidebar-primary-foreground: 215 30% 8%;
+    --sidebar-accent: 215 25% 16%;
+    --sidebar-accent-foreground: 215 15% 90%;
+    --sidebar-border: 215 25% 18%;
+    --sidebar-ring: 45 95% 58%;
+    
+    --gradient-hero: linear-gradient(135deg, hsl(215 75% 20%) 0%, hsl(215 65% 30%) 50%, hsl(45 95% 48%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(215 30% 8%) 0%, hsl(215 28% 12%) 100%);
+    
+    --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.3);
+    --shadow-medium: 0 4px 16px hsl(0 0% 0% / 0.4);
+    --shadow-large: 0 8px 32px hsl(0 0% 0% / 0.5);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+  
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+}
+
+@layer utilities {
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .gradient-subtle {
+    background: var(--gradient-subtle);
+  }
+  
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .shadow-large {
+    box-shadow: var(--shadow-large);
+  }
+  
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+}
