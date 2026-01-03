@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NRSA Championship - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white flex h-screen items-center justify-center relative overflow-hidden">
+
+    <!-- Background -->
+    <!-- Background -->
+    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-[20s] hover:scale-105"
+        style="background-image: url('NRSF Back Banner.png'); opacity: 0.4;">
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
+
+    <div
+        class="w-full max-w-md p-8 bg-gray-900/60 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl relative z-10 mx-4 overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+        <div class="text-center mb-8">
+            <img src="logo.png" alt="NRSA Logo" class="h-20 w-20 mx-auto mb-4 object-contain">
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                NRSA SYSTEM
+            </h1>
+            <p class="text-gray-400 mt-2 text-sm">Unified Access Portal</p>
+        </div>
+
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
+                <input type="email" id="email" required placeholder="name@example.com"
+                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Password</label>
+                <input type="password" id="password" required placeholder="••••••••"
+                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+            </div>
+
+            <button type="submit"
+                class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl shadow-lg transform transition active:scale-95 flex items-center justify-center">
+                <span id="btnText">Sign In</span>
+                <svg id="btnSpinner" class="animate-spin ml-2 h-5 w-5 text-white hidden"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+            </button>
+        </form>
+
+        <div id="msg" class="mt-4 text-center text-sm min-h-[1.5em]"></div>
+
+        <div class="mt-8 pt-6 border-t border-gray-700 text-center">
+            <p class="text-xs text-gray-500">
+                Unauthorized access is prohibited.<br>
+                Contact Administrator for credentials.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 0. Init
+        if (!CONFIG || CONFIG.SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+            document.body.innerHTML = '<div class="h-screen w-screen flex items-center justify-center text-white bg-red-900"><h1>ERROR: Please configure config.js</h1></div>';
+            throw new Error("Supabase config not set.");
+        }
+        const sbClient = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+
+        const $ = (id) => document.getElementById(id);
+
+        // 1. Auto-Redirect if Session Exists
+        async function checkSession() {
+            const { data: { session } } = await sbClient.auth.getSession();
+            if (session) {
+                handleRoleRedirect(session.user.id);
+            }
+        }
+
+        // 2. Login Handler
+        $('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            setLoading(true);
+            const email = $('email').value;
+            const password = $('password').value;
+
+            const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                showMsg(error.message, true);
+                setLoading(false);
+            } else {
+                showMsg("Login successful! Checking permissions...", false);
+                await handleRoleRedirect(data.user.id);
+            }
+        });
+
+        // 3. Role Logic
+        async function handleRoleRedirect(userId) {
+            try {
+                // Fetch Role from admin_profiles
+                // We use 'maybeSingle' in case they are not in the table
+                const { data: profile, error } = await sbClient
+                    .from('admin_profiles')
+                    .select('role, assigned_state_id')
+                    .eq('id', userId)
+                    .maybeSingle();
+
+                if (error) throw error;
+
+                if (!profile) {
+                    // Fallback: If no profile row, are they just a regular user?
+                    // For this system, we might deny access or default to Judge?
+                    // "Can both admin and judge use the same login form" -> Suggests judges enter here too.
+                    // If database has no row, we can't determine.
+                    // Let's assume User wants:
+                    // - Admin/StateAdmin have rows.
+                    // - Judges might have rows with role='judge'.
+                    // If no row, maybe alert "No Role Assigned".
+                    showMsg("Access Denied: No role assigned to this account.", true);
+                    await sbClient.auth.signOut();
+                    setLoading(false);
+                    return;
+                }
+
+                const role = profile.role;
+
+                if (role === 'super_admin' || role === 'state_admin' || role === 'chief_judge') {
+                    window.location.href = 'admin.html';
+                } else if (role === 'judge' || role === 'state_judge') {
+                    window.location.href = 'judge.html';
+                } else {
+                    showMsg(`Unknown Role: ${role}`, true);
+                    setLoading(false);
+                }
+
+            } catch (err) {
+                showMsg("Permission Check Failed: " + err.message, true);
+                setLoading(false);
+            }
+        }
+
+        // Helpers
+        function showMsg(text, isError) {
+            const el = $('msg');
+            el.textContent = text;
+            el.className = isError ? "mt-4 text-center text-sm text-red-400 font-medium" : "mt-4 text-center text-sm text-green-400 font-medium";
+        }
+
+        function setLoading(isLoading) {
+            const btn = document.querySelector('button[type="submit"]');
+            const txt = $('btnText');
+            const spin = $('btnSpinner');
+
+            btn.disabled = isLoading;
+            if (isLoading) {
+                btn.classList.add('opacity-75', 'cursor-not-allowed');
+                txt.textContent = "Verifying...";
+                spin.classList.remove('hidden');
+            } else {
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                txt.textContent = "Sign In";
+                spin.classList.add('hidden');
+            }
+        }
+
+        // Run Init Check
+        checkSession();
+
+    </script>
+</body>
+
+</html>
